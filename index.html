@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CloudFood – AI Food Ordering</title>
+<style>
+  body{font-family:Arial,sans-serif;margin:0;background:#f4f4f6;color:#222}
+  header{background:linear-gradient(90deg,#e23744,#ff7a45);color:#fff;padding:16px 24px;font-size:24px;font-weight:bold}
+  .wrap{max-width:960px;margin:16px auto;padding:0 14px 120px}
+  h2{margin:20px 0 10px}
+  input,textarea{padding:10px;margin:3px 0;max-width:100%;border:1px solid #ddd;border-radius:6px;font-family:inherit;box-sizing:border-box}
+  button{background:#e23744;color:#fff;border:0;border-radius:6px;padding:7px 14px;cursor:pointer}
+  button:hover{background:#c62e3a}
+  button.small{padding:3px 10px;background:#eee;color:#222}
+  button.small:hover{background:#ddd}
+
+  .filters{margin:10px 0;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .filters button.active{background:#2e7d32}
+  .filters select{padding:7px;border-radius:6px;border:1px solid #ddd}
+
+  .restaurant{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.12);margin-bottom:20px}
+  .rhead{display:flex;align-items:center;gap:14px;padding:14px 20px;background:linear-gradient(90deg,#e23744,#ff7a45);color:#fff}
+  .rhead .emoji{font-size:38px}
+  .rhead h3{margin:0;font-size:20px}
+  .rhead p{margin:2px 0 0;font-size:13px;opacity:.9}
+  .dishes{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;padding:16px}
+  .dish{border:1px solid #eee;border-radius:12px;padding:12px;background:#fafafa;display:flex;flex-direction:column;justify-content:space-between;gap:12px}
+  .dname{font-weight:bold;font-size:14px;display:flex;align-items:center;gap:8px}
+  .dot{width:12px;height:12px;border:2px solid;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  .dot::after{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+  .veg{color:#2e7d32}
+  .nonveg{color:#c62828}
+  .drow{display:flex;justify-content:space-between;align-items:center}
+  .price{background:#fff3e0;color:#e65100;font-weight:bold;padding:4px 10px;border-radius:14px;font-size:14px}
+
+  .card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 6px rgba(0,0,0,.12)}
+  .badge{background:#2e7d32;color:#fff;padding:4px 12px;border-radius:12px}
+  .cartrow{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #f0f0f0;flex-wrap:wrap}
+  .cartrow .nm{flex:1;min-width:140px}
+  .form-grid{display:grid;gap:6px;max-width:420px;margin-top:10px}
+  .form-grid input,.form-grid textarea{width:100%}
+  .err{color:#c62828;font-size:13px;min-height:16px}
+  .steps{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+  .step{padding:4px 10px;border-radius:12px;background:#eee;font-size:13px}
+  .step.done{background:#2e7d32;color:#fff}
+
+  #chat{position:fixed;bottom:10px;right:10px;width:300px;max-width:calc(100% - 20px);background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.3);z-index:10}
+  #chat h4{margin:0;padding:10px;background:#333;color:#fff;border-radius:10px 10px 0 0;cursor:pointer;display:flex;justify-content:space-between}
+  #chat.min #chatbody{display:none}
+  #chat.min h4{border-radius:10px}
+  #msgs{height:200px;overflow-y:auto;padding:8px;font-size:13px}
+  #msgs p{margin:6px 0}
+  #chat .row{display:flex;gap:4px;padding:0 8px 8px}
+  #chat .row input{flex:1;min-width:0}
+</style>
+</head>
+<body>
+<header>🍔 CloudFood</header>
+<div class="wrap">
+
+  <h2>Restaurants</h2>
+  <input id="search" placeholder="Search food or restaurant (e.g. burger)" oninput="renderRestaurants()" style="width:100%;max-width:420px">
+  <button onclick="renderRestaurants()">Search</button>
+  <div class="filters">
+    <button id="fAll" class="active" onclick="setFilter('all')">All</button>
+    <button id="fVeg" onclick="setFilter('veg')">🟢 Veg only</button>
+    <select id="sort" onchange="renderRestaurants()">
+      <option value="">Sort: Default</option>
+      <option value="asc">Price: Low to High</option>
+      <option value="desc">Price: High to Low</option>
+    </select>
+  </div>
+  <div id="restaurants"></div>
+
+  <h2>Your Cart</h2>
+  <div class="card">
+    <div id="cart">Cart is empty.</div>
+    <p><b>Total: ₹<span id="total">0</span></b></p>
+    <div class="form-grid">
+      <input id="cname" placeholder="Your name">
+      <input id="cphone" placeholder="Phone number (10 digits)" inputmode="numeric" maxlength="10">
+      <textarea id="caddr" rows="2" placeholder="Delivery address"></textarea>
+      <select id="cpay" style="padding:10px;border-radius:6px;border:1px solid #ddd">
+        <option>Cash on Delivery</option>
+        <option>UPI</option>
+        <option>Card</option>
+      </select>
+      <div class="err" id="formErr"></div>
+      <div><button onclick="placeOrder()">Place Order</button></div>
+    </div>
+  </div>
+
+  <h2>Track Order</h2>
+  <div class="card" id="track">No order yet.</div>
+</div>
+
+<div id="chat" class="min">
+  <h4 onclick="toggleChat()"><span>🤖 AI Food Assistant</span><span id="chev">▲</span></h4>
+  <div id="chatbody">
+    <div class="row" style="padding-top:8px">
+      <input id="key" type="password" placeholder="Paste Gemini API key">
+    </div>
+    <div id="msgs"></div>
+    <div class="row">
+      <input id="q" placeholder="e.g. cheap veg meal?" onkeydown="if(event.key==='Enter')ask()">
+      <button onclick="ask()">Ask</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---------- Data (acts as the database) ----------
+  const DATA = [
+    {id:1, name:"Pizza Palace", cuisine:"Italian", emoji:"🍕", items:[
+      {name:"Margherita Pizza", price:249, veg:true},
+      {name:"Veg Supreme Pizza", price:299, veg:true},
+      {name:"Paneer Tikka Pizza", price:329, veg:true},
+      {name:"Garlic Bread", price:99, veg:true},
+      {name:"Pasta Alfredo (Veg)", price:179, veg:true}]},
+    {id:2, name:"Biryani House", cuisine:"Indian", emoji:"🍛", items:[
+      {name:"Chicken Biryani", price:199, veg:false},
+      {name:"Veg Biryani", price:149, veg:true},
+      {name:"Paneer Biryani", price:179, veg:true},
+      {name:"Mushroom Biryani", price:169, veg:true},
+      {name:"Raita", price:39, veg:true}]},
+    {id:3, name:"Burger Barn", cuisine:"Fast Food", emoji:"🍔", items:[
+      {name:"Cheese Burger", price:129, veg:true},
+      {name:"Veg Burger", price:99, veg:true},
+      {name:"Paneer Burger", price:139, veg:true},
+      {name:"French Fries", price:79, veg:true},
+      {name:"Chicken Burger", price:149, veg:false}]},
+    {id:4, name:"Green Bowl", cuisine:"Pure Veg", emoji:"🥗", items:[
+      {name:"Paneer Butter Masala", price:189, veg:true},
+      {name:"Dal Tadka with Rice", price:129, veg:true},
+      {name:"Veg Fried Rice", price:119, veg:true},
+      {name:"Masala Dosa", price:89, veg:true},
+      {name:"Veg Sandwich", price:69, veg:true},
+      {name:"Gulab Jamun", price:59, veg:true}]}
+  ];
+  const MODELS = ["gemini-3.7-flash", "gemini-3.6-flash", "gemini-2.0-flash"];  // tried in order
+  const STATUSES = ["Placed","Preparing","Out for Delivery","Delivered"];
+  let cart = {};
+  let vegOnly = false;
+  let orderTimer = null;
+  const history = [];           // chat memory for the AI
+
+  const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  const jsq = s => String(s).replace(/\\/g,"\\\\").replace(/'/g,"\\'");
+
+  // ---------- Browse + Search + Filter + Sort ----------
+  function setFilter(f){
+    vegOnly = (f === "veg");
+    document.getElementById("fAll").classList.toggle("active", !vegOnly);
+    document.getElementById("fVeg").classList.toggle("active", vegOnly);
+    renderRestaurants();
+  }
+
+  function renderRestaurants(){
+    const term = document.getElementById("search").value.toLowerCase().trim();
+    const sort = document.getElementById("sort").value;
+    const list = DATA.map(r => {
+      const restMatch = (r.name + " " + r.cuisine).toLowerCase().includes(term);
+      let items = r.items.filter(i =>
+        (!vegOnly || i.veg) && (!term || restMatch || i.name.toLowerCase().includes(term)));
+      if (sort === "asc") items = [...items].sort((a,b) => a.price - b.price);
+      if (sort === "desc") items = [...items].sort((a,b) => b.price - a.price);
+      return {...r, items};
+    }).filter(r => r.items.length);
+
+    document.getElementById("restaurants").innerHTML = list.length
+      ? list.map(r => `<div class="restaurant">
+          <div class="rhead"><div class="emoji">${r.emoji}</div>
+            <div><h3>${esc(r.name)}</h3><p>${esc(r.cuisine)}</p></div></div>
+          <div class="dishes">
+            ${r.items.map(i => `<div class="dish">
+              <div class="dname"><span class="dot ${i.veg ? "veg" : "nonveg"}"></span>${esc(i.name)}</div>
+              <div class="drow"><span class="price">₹${i.price}</span>
+                <button onclick="addItem('${jsq(i.name)}',${i.price})">Add</button></div>
+            </div>`).join("")}
+          </div></div>`).join("")
+      : "<p>No restaurant found.</p>";
+  }
+
+  // ---------- Cart (with +/- , remove, saved in localStorage) ----------
+  function saveCart(){ try{ localStorage.setItem("cf_cart", JSON.stringify(cart)); }catch(e){} }
+  function loadCart(){ try{ cart = JSON.parse(localStorage.getItem("cf_cart")) || {}; }catch(e){ cart = {}; } }
+
+  function addItem(name, price){
+    cart[name] = cart[name] || {price: price, qty: 0};
+    cart[name].qty++;
+    renderCart();
+  }
+  function changeQty(name, d){
+    if(!cart[name]) return;
+    cart[name].qty += d;
+    if(cart[name].qty <= 0) delete cart[name];
+    renderCart();
+  }
+  function removeItem(name){ delete cart[name]; renderCart(); }
+
+  function renderCart(){
+    const names = Object.keys(cart);
+    let total = 0;
+    document.getElementById("cart").innerHTML = names.length
+      ? names.map(n => { total += cart[n].price * cart[n].qty;
+          return `<div class="cartrow">
+            <span class="nm">${esc(n)}</span>
+            <button class="small" onclick="changeQty('${jsq(n)}',-1)">−</button>
+            <b>${cart[n].qty}</b>
+            <button class="small" onclick="changeQty('${jsq(n)}',1)">+</button>
+            <span>₹${cart[n].price * cart[n].qty}</span>
+            <button class="small" onclick="removeItem('${jsq(n)}')">✕</button>
+          </div>`; }).join("")
+      : "Cart is empty.";
+    document.getElementById("total").textContent = total;
+    saveCart();
+  }
+
+  // ---------- Order + status tracking (simulated) ----------
+  function placeOrder(){
+    const err = document.getElementById("formErr");
+    if(!Object.keys(cart).length){ err.textContent = "Add something to your cart first."; return; }
+    const name = document.getElementById("cname").value.trim();
+    const phone = document.getElementById("cphone").value.trim();
+    const addr = document.getElementById("caddr").value.trim();
+    const pay = document.getElementById("cpay").value;
+    if(name.length < 2){ err.textContent = "Please enter your name."; return; }
+    if(!/^[6-9]\d{9}$/.test(phone)){ err.textContent = "Enter a valid 10-digit phone number."; return; }
+    if(addr.length < 8){ err.textContent = "Please enter your full delivery address."; return; }
+    err.textContent = "";
+
+    const id = Math.floor(1000 + Math.random()*9000);
+    const total = document.getElementById("total").textContent;
+    const lines = Object.keys(cart).map(n => `${esc(n)} × ${cart[n].qty}`).join(", ");
+    cart = {}; renderCart();
+
+    let step = 0;
+    clearInterval(orderTimer);
+    const show = () => document.getElementById("track").innerHTML =
+      `<b>Order #${id}</b> for ${esc(name)} – ₹${total} (${esc(pay)})<br>
+       <small>${lines}</small><br>
+       <small>Deliver to: ${esc(addr)} · ${esc(phone)}</small>
+       <div class="steps">${STATUSES.map((s,i) =>
+         `<span class="step ${i <= step ? "done" : ""}">${s}</span>`).join("")}</div>
+       <p>Status: <span class="badge">${STATUSES[step]}</span></p>`;
+    show();
+    orderTimer = setInterval(() => {
+      step++; show();
+      if(step >= STATUSES.length - 1) clearInterval(orderTimer);
+    }, 6000);
+  }
+
+  // ---------- Chat helpers ----------
+  function toggleChat(){
+    const c = document.getElementById("chat");
+    c.classList.toggle("min");
+    document.getElementById("chev").textContent = c.classList.contains("min") ? "▲" : "▼";
+  }
+
+  // turns **bold**, *italic*, bullets and new lines into clean HTML
+  function fmt(s){
+    return esc(s)
+      .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
+      .replace(/^\s*[\*\-]\s+/gm, "• ")
+      .replace(/\*(.+?)\*/g, "<i>$1</i>")
+      .replace(/\n/g, "<br>");
+  }
+
+  function findDish(name){
+    const n = name.toLowerCase().trim();
+    for (const r of DATA) for (const i of r.items)
+      if (i.name.toLowerCase() === n) return i;
+    return null;
+  }
+
+  // ---------- AI assistant (Gemini API) with memory, retry + backup models ----------
+  async function ask(){
+    const q = document.getElementById("q"), msgs = document.getElementById("msgs");
+    const key = document.getElementById("key").value.trim();
+    const text = q.value.trim();
+    if(!text) return;
+    q.value = "";
+    msgs.innerHTML += `<p><b>You:</b> ${esc(text)}</p>`;
+
+    if(!key){
+      const words = text.toLowerCase().split(/\s+/);
+      const found = [];
+      DATA.forEach(r => r.items.forEach(i => {
+        const hay = (r.name + " " + r.cuisine + " " + i.name).toLowerCase();
+        if (words.some(w => w.length > 2 && hay.includes(w)))
+          found.push(`${i.name} (₹${i.price}) at ${r.name}`);
+      }));
+      msgs.innerHTML += `<p><b>Basic search (no AI key):</b> ${found.length
+        ? "You can try: " + found.map(esc).join(", ")
+        : "Sorry, nothing matched. Try pizza, biryani or burger."}</p>`;
+      msgs.scrollTop = msgs.scrollHeight;
+      return;
+    }
+
+    const menu = DATA.map(r => r.name + ": " + r.items.map(i =>
+      `${i.name} ₹${i.price} (${i.veg ? "veg" : "non-veg"})`).join(", ")).join("\n");
+    const sys = "You are a friendly food ordering assistant for CloudFood. " +
+      "Recommend dishes ONLY from this menu, mention restaurant and price, keep it short. " +
+      "Use the earlier conversation to understand short replies like 'yes' or 'add it'. " +
+      "When the customer clearly agrees to add a dish to their order, confirm briefly and end your reply " +
+      "with a separate final line in exactly this format: ADD: <exact dish name from the menu>. " +
+      "Never write the ADD line unless the customer has agreed.\n\nMenu:\n" + menu;
+
+    history.push({role:"user", parts:[{text}]});
+
+    const wait = document.createElement("p");
+    wait.innerHTML = "<b>AI:</b> Thinking…";
+    msgs.appendChild(wait);
+    msgs.scrollTop = msgs.scrollHeight;
+
+    let answer = "", lastErr = "";
+    for (const model of MODELS) {
+      for (let attempt = 0; attempt < 2 && !answer; attempt++) {
+        try {
+          const res = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`,
+            {method:"POST", headers:{"Content-Type":"application/json"}, signal: AbortSignal.timeout(15000),
+             body: JSON.stringify({
+               systemInstruction:{parts:[{text:sys}]},
+               contents: history})});
+          const data = await res.json();
+          answer = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+          if (!answer) {
+            lastErr = "Error " + res.status + ": " + (data.error?.message || "no answer");
+            if (res.status === 401 || res.status === 403 || res.status === 400) break;
+            if (res.status === 503 || res.status === 429) await new Promise(r => setTimeout(r, 2000));
+            else break;
+          }
+        } catch (e) { lastErr = "Request failed: " + e.message; break; }
+      }
+      if (answer) break;
+    }
+
+    if (answer) {
+      history.push({role:"model", parts:[{text:answer}]});
+      // let the AI add items to the cart
+      const m = answer.match(/^\s*ADD:\s*(.+)$/im);
+      let note = "";
+      if (m) {
+        const dish = findDish(m[1].replace(/\*/g,""));
+        if (dish) { addItem(dish.name, dish.price); note = `<br><i>✅ ${esc(dish.name)} added to your cart.</i>`; }
+        answer = answer.replace(/^\s*ADD:.*$/im, "").trim();
+      }
+      wait.innerHTML = "<b>AI:</b> " + fmt(answer) + note;
+    } else {
+      history.pop();   // remove the failed question so memory stays clean
+      wait.innerHTML = "<b>AI:</b> " + esc(lastErr);
+    }
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  // ---------- Start ----------
+  loadCart();
+  renderCart();
+  renderRestaurants();
+</script>
+</body>
+</html>
