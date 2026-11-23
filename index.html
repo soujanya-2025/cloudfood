@@ -2,363 +2,273 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>CloudFood – AI Food Ordering</title>
 <style>
-  body{font-family:Arial,sans-serif;margin:0;background:#f4f4f6;color:#222}
-  header{background:linear-gradient(90deg,#e23744,#ff7a45);color:#fff;padding:16px 24px;font-size:24px;font-weight:bold}
-  .wrap{max-width:960px;margin:16px auto;padding:0 14px 120px}
-  h2{margin:20px 0 10px}
-  input,textarea{padding:10px;margin:3px 0;max-width:100%;border:1px solid #ddd;border-radius:6px;font-family:inherit;box-sizing:border-box}
-  button{background:#e23744;color:#fff;border:0;border-radius:6px;padding:7px 14px;cursor:pointer}
-  button:hover{background:#c62e3a}
-  button.small{padding:3px 10px;background:#eee;color:#222}
-  button.small:hover{background:#ddd}
+/* ===== Base ===== */
+:root{--red:#e23744;--orange:#ff7a45;--wine:#4a1220;--peach:#fff3e0;--green:#2e7d32;--ink:#2b2b2b;--mut:#7a6a63}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",Roboto,Arial,sans-serif;background:#fff8f2;color:var(--ink)}
+button{font:inherit;cursor:pointer}
+select{padding:8px 12px;border:1px solid #e6d2c4;border-radius:10px;background:#fff;font:inherit}
 
-  .filters{margin:10px 0;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-  .filters button.active{background:#2e7d32}
-  .filters select{padding:7px;border-radius:6px;border:1px solid #ddd}
+/* ===== Header and hero ===== */
+.top{position:sticky;top:0;z-index:20;display:flex;gap:12px;align-items:center;padding:12px 24px;background:var(--wine);color:#fff;flex-wrap:wrap}
+.logo{font-size:22px;font-weight:800}
+.top input{flex:1;min-width:180px;max-width:460px;padding:10px 16px;border:0;border-radius:24px;font:inherit}
+.cartbtn{margin-left:auto;background:var(--orange);color:#fff;border:0;border-radius:24px;padding:10px 18px;font-weight:700}
+.hero{background:linear-gradient(120deg,var(--red),var(--orange));color:#fff;padding:36px 24px;text-align:center}
+.hero h1{margin:0 0 8px;font-size:34px}
+.hero p{margin:0 0 16px;opacity:.95}
+.hero button{background:#fff;color:var(--red);border:0;border-radius:24px;padding:10px 22px;font-weight:700}
 
-  .restaurant{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.12);margin-bottom:20px}
-  .rhead{display:flex;align-items:center;gap:14px;padding:14px 20px;background:linear-gradient(90deg,#e23744,#ff7a45);color:#fff}
-  .rhead .emoji{font-size:38px}
-  .rhead h3{margin:0;font-size:20px}
-  .rhead p{margin:2px 0 0;font-size:13px;opacity:.9}
-  .dishes{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;padding:16px}
-  .dish{border:1px solid #eee;border-radius:12px;padding:12px;background:#fafafa;display:flex;flex-direction:column;justify-content:space-between;gap:12px}
-  .dname{font-weight:bold;font-size:14px;display:flex;align-items:center;gap:8px}
-  .dot{width:12px;height:12px;border:2px solid;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
-  .dot::after{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
-  .veg{color:#2e7d32}
-  .nonveg{color:#c62828}
-  .drow{display:flex;justify-content:space-between;align-items:center}
-  .price{background:#fff3e0;color:#e65100;font-weight:bold;padding:4px 10px;border-radius:14px;font-size:14px}
+/* ===== Filters ===== */
+.bar{max-width:1100px;margin:18px auto 0;padding:0 24px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.chip{border:2px solid var(--green);background:#fff;color:var(--green);border-radius:20px;padding:6px 14px;font-weight:600}
+.chip.on{background:var(--green);color:#fff}
 
-  .card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 6px rgba(0,0,0,.12)}
-  .badge{background:#2e7d32;color:#fff;padding:4px 12px;border-radius:12px}
-  .cartrow{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #f0f0f0;flex-wrap:wrap}
-  .cartrow .nm{flex:1;min-width:140px}
-  .form-grid{display:grid;gap:6px;max-width:420px;margin-top:10px}
-  .form-grid input,.form-grid textarea{width:100%}
-  .err{color:#c62828;font-size:13px;min-height:16px}
-  .steps{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
-  .step{padding:4px 10px;border-radius:12px;background:#eee;font-size:13px}
-  .step.done{background:#2e7d32;color:#fff}
+/* ===== Restaurants and dishes ===== */
+.layout{max-width:1100px;margin:16px auto 90px;padding:0 24px}
+.rest{background:#fff;border-radius:18px;box-shadow:0 4px 16px rgba(74,18,32,.08);margin-bottom:20px;overflow:hidden}
+.rhead{display:flex;gap:14px;align-items:center;padding:14px 18px;background:var(--peach)}
+.rhead .em{font-size:38px}
+.rhead h3{margin:0;color:var(--wine)}
+.rhead p{margin:2px 0 0;color:var(--mut);font-size:14px}
+.dishes{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;padding:16px}
+.dish{border:1px solid #f0e2d8;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;transition:.15s}
+.dish:hover{transform:translateY(-3px);box-shadow:0 6px 14px rgba(0,0,0,.1)}
+.dn{font-weight:600;display:flex;gap:8px;align-items:center}
+.dot{width:12px;height:12px;border:2px solid;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.dot::after{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.veg{color:var(--green)}
+.nonveg{color:#c62828}
+.dr{display:flex;justify-content:space-between;align-items:center}
+.price{font-weight:700;color:#e65100}
+.add{background:#fff;color:var(--red);border:2px solid var(--red);border-radius:10px;padding:5px 14px;font-weight:700}
+.add:hover{background:var(--red);color:#fff}
 
-  #chat{position:fixed;bottom:10px;right:10px;width:300px;max-width:calc(100% - 20px);background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.3);z-index:10}
-  #chat h4{margin:0;padding:10px;background:#333;color:#fff;border-radius:10px 10px 0 0;cursor:pointer;display:flex;justify-content:space-between}
-  #chat.min #chatbody{display:none}
-  #chat.min h4{border-radius:10px}
-  #msgs{height:200px;overflow-y:auto;padding:8px;font-size:13px}
-  #msgs p{margin:6px 0}
-  #chat .row{display:flex;gap:4px;padding:0 8px 8px}
-  #chat .row input{flex:1;min-width:0}
+/* ===== Cart popup ===== */
+.side{position:fixed;inset:0;z-index:40;background:rgba(74,18,32,.55);display:none;overflow-y:auto;padding:24px 12px}
+.side.open{display:block}
+.side>.card{max-width:480px;margin:0 auto 16px;position:relative}
+.card{background:#fff;border-radius:18px;padding:16px;box-shadow:0 4px 16px rgba(74,18,32,.08)}
+.card h3{margin:0 0 10px;color:var(--wine)}
+.x{position:absolute;top:10px;right:12px;background:var(--peach);color:var(--red);border:0;border-radius:50%;width:30px;height:30px;font-weight:800}
+.line{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed #eadbd0;font-size:14px}
+.qty button{width:26px;height:26px;border-radius:50%;border:0;background:var(--peach);color:var(--red);font-weight:800}
+.qty span{display:inline-block;min-width:22px;text-align:center}
+.total{display:flex;justify-content:space-between;font-weight:800;margin:10px 0}
+.card input,.card textarea,.card select{width:100%;margin:4px 0;padding:9px 10px;border:1px solid #e6d2c4;border-radius:10px;font:inherit}
+.primary{width:100%;background:linear-gradient(90deg,var(--red),var(--orange));color:#fff;border:0;border-radius:12px;padding:11px;font-weight:700;margin-top:6px}
+.err{color:#c62828;font-size:13px;min-height:18px}
+.steps{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.st{padding:4px 10px;border-radius:14px;background:#eee;color:#888;font-size:12px}
+.st.done{background:var(--green);color:#fff}
+
+/* ===== AI chat ===== */
+.fab{position:fixed;right:20px;bottom:20px;z-index:30;background:var(--wine);color:#fff;border:0;border-radius:30px;padding:14px 20px;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.3)}
+#chat{position:fixed;right:20px;bottom:80px;z-index:30;width:330px;max-width:calc(100% - 40px);background:#fff;border-radius:18px;box-shadow:0 8px 28px rgba(0,0,0,.3);overflow:hidden;display:none}
+#chat.open{display:block}
+#chat h4{margin:0;padding:12px 16px;background:var(--wine);color:#fff}
+#chat .k{padding:8px 12px 0}
+#chat .k input{width:100%;padding:8px 10px;border:1px solid #e6d2c4;border-radius:10px}
+#msgs{height:230px;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px;font-size:14px}
+.m{padding:8px 12px;border-radius:14px;max-width:88%;white-space:pre-wrap}
+.m.u{align-self:flex-end;background:var(--red);color:#fff}
+.m.a{align-self:flex-start;background:var(--peach)}
+.m.s{align-self:center;color:var(--mut);font-size:12px}
+#chat .in{display:flex;gap:6px;padding:10px 12px}
+#chat .in input{flex:1;min-width:0;padding:9px 12px;border:1px solid #e6d2c4;border-radius:20px}
+#chat .in button{background:var(--red);color:#fff;border:0;border-radius:20px;padding:0 16px;font-weight:700}
 </style>
 </head>
 <body>
-<header>🍔 CloudFood</header>
-<div class="wrap">
 
-  <h2>Restaurants</h2>
-  <input id="search" placeholder="Search food or restaurant (e.g. burger)" oninput="renderRestaurants()" style="width:100%;max-width:420px">
-  <button onclick="renderRestaurants()">Search</button>
-  <div class="filters">
-    <button id="fAll" class="active" onclick="setFilter('all')">All</button>
-    <button id="fVeg" onclick="setFilter('veg')">🟢 Veg only</button>
-    <select id="sort" onchange="renderRestaurants()">
-      <option value="">Sort: Default</option>
-      <option value="asc">Price: Low to High</option>
-      <option value="desc">Price: High to Low</option>
-    </select>
-  </div>
-  <div id="restaurants"></div>
+<!-- ===== Header ===== -->
+<header class="top">
+  <span class="logo">🍔 CloudFood</span>
+  <input id="search" placeholder="Search food or restaurant…">
+  <button class="cartbtn" id="cartbtn">🛒 Cart (<span id="cc">0</span>)</button>
+</header>
 
-  <h2>Your Cart</h2>
-  <div class="card">
-    <div id="cart">Cart is empty.</div>
-    <p><b>Total: ₹<span id="total">0</span></b></p>
-    <div class="form-grid">
-      <input id="cname" placeholder="Your name">
-      <input id="cphone" placeholder="Phone number (10 digits)" inputmode="numeric" maxlength="10">
-      <textarea id="caddr" rows="2" placeholder="Delivery address"></textarea>
-      <select id="cpay" style="padding:10px;border-radius:6px;border:1px solid #ddd">
-        <option>Cash on Delivery</option>
-        <option>UPI</option>
-        <option>Card</option>
-      </select>
-      <div class="err" id="formErr"></div>
-      <div><button onclick="placeOrder()">Place Order</button></div>
-    </div>
-  </div>
+<!-- ===== Hero ===== -->
+<section class="hero">
+  <h1>Hungry? Ask our AI.</h1>
+  <p>Browse four restaurants, order in a few taps and track your food.</p>
+  <button id="heroask">Ask the AI assistant</button>
+</section>
 
-  <h2>Track Order</h2>
-  <div class="card" id="track">No order yet.</div>
+<!-- ===== Filters ===== -->
+<div class="bar">
+  <button class="chip" id="vegbtn">🟢 Veg only</button>
+  <select id="sort">
+    <option value="">Sort: default</option>
+    <option value="asc">Price: low to high</option>
+    <option value="desc">Price: high to low</option>
+  </select>
 </div>
 
-<div id="chat" class="min">
-  <h4 onclick="toggleChat()"><span>🤖 AI Food Assistant</span><span id="chev">▲</span></h4>
-  <div id="chatbody">
-    <div class="row" style="padding-top:8px">
-      <input id="key" type="password" placeholder="Paste Gemini API key">
-    </div>
-    <div id="msgs"></div>
-    <div class="row">
-      <input id="q" placeholder="e.g. cheap veg meal?" onkeydown="if(event.key==='Enter')ask()">
-      <button onclick="ask()">Ask</button>
-    </div>
+<!-- ===== Menu ===== -->
+<div class="layout"><main id="menu"></main></div>
+
+<!-- ===== Cart popup ===== -->
+<aside class="side" id="side">
+  <div class="card" id="cartcard">
+    <button class="x" id="closecart">✕</button>
+    <h3>Your cart</h3>
+    <div id="cart"></div>
+    <div class="total"><span>Total</span><span>₹<span id="total">0</span></span></div>
+    <input id="cname" placeholder="Full name">
+    <input id="cphone" placeholder="Phone (10 digits)" inputmode="numeric" maxlength="10">
+    <textarea id="caddr" rows="2" placeholder="Delivery address"></textarea>
+    <select id="cpay"><option>Cash on Delivery</option><option>UPI</option><option>Card</option></select>
+    <div class="err" id="err"></div>
+    <button class="primary" id="place">Place order</button>
   </div>
+  <div class="card"><h3>Track order</h3><div id="track">No order yet.</div></div>
+</aside>
+
+<!-- ===== AI chat ===== -->
+<button class="fab" id="fab">🤖 Ask AI</button>
+<div id="chat">
+  <h4>AI Food Assistant</h4>
+  <div class="k"><input id="key" type="password" placeholder="Paste Gemini API key" autocomplete="off"></div>
+  <div id="msgs"></div>
+  <div class="in"><input id="q" placeholder="e.g. cheap veg meal?"><button id="ask">Ask</button></div>
 </div>
 
 <script>
-  // ---------- Data (acts as the database) ----------
-  const DATA = [
-    {id:1, name:"Pizza Palace", cuisine:"Italian", emoji:"🍕", items:[
-      {name:"Margherita Pizza", price:249, veg:true},
-      {name:"Veg Supreme Pizza", price:299, veg:true},
-      {name:"Paneer Tikka Pizza", price:329, veg:true},
-      {name:"Garlic Bread", price:99, veg:true},
-      {name:"Pasta Alfredo (Veg)", price:179, veg:true}]},
-    {id:2, name:"Biryani House", cuisine:"Indian", emoji:"🍛", items:[
-      {name:"Chicken Biryani", price:199, veg:false},
-      {name:"Veg Biryani", price:149, veg:true},
-      {name:"Paneer Biryani", price:179, veg:true},
-      {name:"Mushroom Biryani", price:169, veg:true},
-      {name:"Raita", price:39, veg:true}]},
-    {id:3, name:"Burger Barn", cuisine:"Fast Food", emoji:"🍔", items:[
-      {name:"Cheese Burger", price:129, veg:true},
-      {name:"Veg Burger", price:99, veg:true},
-      {name:"Paneer Burger", price:139, veg:true},
-      {name:"French Fries", price:79, veg:true},
-      {name:"Chicken Burger", price:149, veg:false}]},
-    {id:4, name:"Green Bowl", cuisine:"Pure Veg", emoji:"🥗", items:[
-      {name:"Paneer Butter Masala", price:189, veg:true},
-      {name:"Dal Tadka with Rice", price:129, veg:true},
-      {name:"Veg Fried Rice", price:119, veg:true},
-      {name:"Masala Dosa", price:89, veg:true},
-      {name:"Veg Sandwich", price:69, veg:true},
-      {name:"Gulab Jamun", price:59, veg:true}]}
-  ];
-  const MODELS = ["gemini-3.7-flash", "gemini-3.6-flash", "gemini-2.0-flash"];  // tried in order
-  const STATUSES = ["Placed","Preparing","Out for Delivery","Delivered"];
-  let cart = {};
-  let vegOnly = false;
-  let orderTimer = null;
-  const history = [];           // chat memory for the AI
+/* ===== 1. Data ===== */
+const DATA=[
+ {name:"Pizza Palace",cuisine:"Italian",emoji:"🍕",items:[
+  {name:"Margherita Pizza",price:249,veg:true},{name:"Veg Supreme Pizza",price:299,veg:true},
+  {name:"Paneer Tikka Pizza",price:329,veg:true},{name:"Garlic Bread",price:99,veg:true},
+  {name:"Pasta Alfredo (Veg)",price:179,veg:true}]},
+ {name:"Biryani House",cuisine:"Indian",emoji:"🍛",items:[
+  {name:"Chicken Biryani",price:199,veg:false},{name:"Veg Biryani",price:149,veg:true},
+  {name:"Paneer Biryani",price:179,veg:true},{name:"Mushroom Biryani",price:169,veg:true},
+  {name:"Raita",price:39,veg:true}]},
+ {name:"Burger Barn",cuisine:"Fast Food",emoji:"🍔",items:[
+  {name:"Cheese Burger",price:129,veg:true},{name:"Veg Burger",price:99,veg:true},
+  {name:"Paneer Burger",price:139,veg:true},{name:"French Fries",price:79,veg:true},
+  {name:"Chicken Burger",price:149,veg:false}]},
+ {name:"Green Bowl",cuisine:"Pure Veg",emoji:"🥗",items:[
+  {name:"Paneer Butter Masala",price:189,veg:true},{name:"Dal Tadka with Rice",price:129,veg:true},
+  {name:"Veg Fried Rice",price:119,veg:true},{name:"Masala Dosa",price:89,veg:true},
+  {name:"Veg Sandwich",price:69,veg:true},{name:"Gulab Jamun",price:59,veg:true}]}
+];
+const MODELS=["gemini-3.7-flash","gemini-3.6-flash","gemini-2.5-flash","gemini-2.0-flash"];
+const STATUSES=["Placed","Preparing","Out for Delivery","Delivered"];
 
-  const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-  const jsq = s => String(s).replace(/\\/g,"\\\\").replace(/'/g,"\\'");
+/* ===== 2. Helpers and state ===== */
+const $=id=>document.getElementById(id);
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let cart={},vegOnly=false,history=[],timer=null;
+try{cart=JSON.parse(localStorage.getItem("cf_cart")||"{}")}catch(e){cart={}}
+const save=()=>{try{localStorage.setItem("cf_cart",JSON.stringify(cart))}catch(e){}};
+const allDishes=()=>DATA.flatMap(r=>r.items.map(i=>({...i,rest:r.name})));
 
-  // ---------- Browse + Search + Filter + Sort ----------
-  function setFilter(f){
-    vegOnly = (f === "veg");
-    document.getElementById("fAll").classList.toggle("active", !vegOnly);
-    document.getElementById("fVeg").classList.toggle("active", vegOnly);
-    renderRestaurants();
+/* ===== 3. Menu: search, veg filter, sorting ===== */
+function renderMenu(){
+  const term=$("search").value.toLowerCase().trim(), sort=$("sort").value;
+  const html=DATA.map(r=>{
+    let items=r.items.filter(i=>(!vegOnly||i.veg)&&(!term||(r.name+" "+r.cuisine+" "+i.name).toLowerCase().includes(term)));
+    if(sort) items=[...items].sort((a,b)=>sort==="asc"?a.price-b.price:b.price-a.price);
+    if(!items.length) return "";
+    return `<section class="rest"><div class="rhead"><span class="em">${r.emoji}</span><div><h3>${esc(r.name)}</h3><p>${esc(r.cuisine)}</p></div></div><div class="dishes">${items.map(i=>`<div class="dish"><div class="dn"><span class="dot ${i.veg?"veg":"nonveg"}"></span>${esc(i.name)}</div><div class="dr"><span class="price">₹${i.price}</span><button class="add" data-add="${esc(i.name)}">Add</button></div></div>`).join("")}</div></section>`;
+  }).join("");
+  $("menu").innerHTML=html||'<div class="card">No dishes found. Try another search.</div>';
+}
+
+/* ===== 4. Cart ===== */
+function findDish(name){return allDishes().find(d=>d.name.toLowerCase()===String(name).trim().toLowerCase())}
+function addItem(name){
+  const d=findDish(name); if(!d) return null;
+  cart[d.name]=cart[d.name]||{price:d.price,qty:0}; cart[d.name].qty++;
+  renderCart(); return d;
+}
+function renderCart(){
+  const names=Object.keys(cart); let total=0,count=0;
+  $("cart").innerHTML=names.length?names.map(n=>{
+    const c=cart[n]; total+=c.price*c.qty; count+=c.qty;
+    return `<div class="line"><span>${esc(n)}</span><span class="qty"><button data-q="${esc(n)}" data-d="-1">−</button><span>${c.qty}</span><button data-q="${esc(n)}" data-d="1">+</button></span><b>₹${c.price*c.qty}</b></div>`;
+  }).join(""):'<p style="color:var(--mut)">Your cart is empty.</p>';
+  $("total").textContent=total; $("cc").textContent=count; save();
+}
+document.addEventListener("click",e=>{
+  const a=e.target.closest("[data-add]"); if(a){addItem(a.dataset.add);return}
+  const q=e.target.closest("[data-q]");
+  if(q){const n=q.dataset.q; if(cart[n]){cart[n].qty+=Number(q.dataset.d); if(cart[n].qty<=0) delete cart[n]; renderCart()}}
+});
+
+/* ===== 5. Order form and status tracker ===== */
+$("place").onclick=()=>{
+  const name=$("cname").value.trim(),phone=$("cphone").value.trim(),addr=$("caddr").value.trim(),pay=$("cpay").value,err=$("err");
+  if(!Object.keys(cart).length){err.textContent="Add at least one dish first.";return}
+  if(name.length<2){err.textContent="Please enter your name.";return}
+  if(!/^\d{10}$/.test(phone)){err.textContent="Phone must be exactly 10 digits.";return}
+  if(addr.length<8){err.textContent="Please enter a full delivery address.";return}
+  err.textContent="";
+  const id=Math.floor(1000+Math.random()*9000), total=$("total").textContent;
+  const items=Object.keys(cart).map(n=>n+" × "+cart[n].qty).join(", ");
+  cart={}; renderCart();
+  let step=0; clearInterval(timer);
+  const show=()=>{$("track").innerHTML=`<b>Order #${id}</b> · ₹${total} (${esc(pay)})<br><small>${esc(items)}<br>Deliver to: ${esc(addr)}</small><div class="steps">${STATUSES.map((s,i)=>`<span class="st ${i<=step?"done":""}">${s}</span>`).join("")}</div>`};
+  show();
+  timer=setInterval(()=>{step++; show(); if(step>=STATUSES.length-1) clearInterval(timer)},6000);
+};
+
+/* ===== 6. AI assistant (Gemini API) ===== */
+function addMsg(cls,text){const d=document.createElement("div");d.className="m "+cls;d.textContent=text;$("msgs").appendChild(d);$("msgs").scrollTop=1e6;return d}
+async function ask(){
+  const text=$("q").value.trim(), key=$("key").value.trim();
+  if(!text) return; $("q").value=""; addMsg("u",text);
+  if(!key){
+    const w=text.toLowerCase().split(/\s+/).filter(x=>x.length>2);
+    const f=allDishes().filter(d=>w.some(x=>(d.rest+" "+d.name).toLowerCase().includes(x))).map(d=>`${d.name} (₹${d.price}) at ${d.rest}`);
+    addMsg("a",f.length?"Basic search (add a Gemini key for AI): "+f.join(", "):"Nothing matched. Paste a Gemini key above for AI help.");
+    return;
   }
-
-  function renderRestaurants(){
-    const term = document.getElementById("search").value.toLowerCase().trim();
-    const sort = document.getElementById("sort").value;
-    const list = DATA.map(r => {
-      const restMatch = (r.name + " " + r.cuisine).toLowerCase().includes(term);
-      let items = r.items.filter(i =>
-        (!vegOnly || i.veg) && (!term || restMatch || i.name.toLowerCase().includes(term)));
-      if (sort === "asc") items = [...items].sort((a,b) => a.price - b.price);
-      if (sort === "desc") items = [...items].sort((a,b) => b.price - a.price);
-      return {...r, items};
-    }).filter(r => r.items.length);
-
-    document.getElementById("restaurants").innerHTML = list.length
-      ? list.map(r => `<div class="restaurant">
-          <div class="rhead"><div class="emoji">${r.emoji}</div>
-            <div><h3>${esc(r.name)}</h3><p>${esc(r.cuisine)}</p></div></div>
-          <div class="dishes">
-            ${r.items.map(i => `<div class="dish">
-              <div class="dname"><span class="dot ${i.veg ? "veg" : "nonveg"}"></span>${esc(i.name)}</div>
-              <div class="drow"><span class="price">₹${i.price}</span>
-                <button onclick="addItem('${jsq(i.name)}',${i.price})">Add</button></div>
-            </div>`).join("")}
-          </div></div>`).join("")
-      : "<p>No restaurant found.</p>";
-  }
-
-  // ---------- Cart (with +/- , remove, saved in localStorage) ----------
-  function saveCart(){ try{ localStorage.setItem("cf_cart", JSON.stringify(cart)); }catch(e){} }
-  function loadCart(){ try{ cart = JSON.parse(localStorage.getItem("cf_cart")) || {}; }catch(e){ cart = {}; } }
-
-  function addItem(name, price){
-    cart[name] = cart[name] || {price: price, qty: 0};
-    cart[name].qty++;
-    renderCart();
-  }
-  function changeQty(name, d){
-    if(!cart[name]) return;
-    cart[name].qty += d;
-    if(cart[name].qty <= 0) delete cart[name];
-    renderCart();
-  }
-  function removeItem(name){ delete cart[name]; renderCart(); }
-
-  function renderCart(){
-    const names = Object.keys(cart);
-    let total = 0;
-    document.getElementById("cart").innerHTML = names.length
-      ? names.map(n => { total += cart[n].price * cart[n].qty;
-          return `<div class="cartrow">
-            <span class="nm">${esc(n)}</span>
-            <button class="small" onclick="changeQty('${jsq(n)}',-1)">−</button>
-            <b>${cart[n].qty}</b>
-            <button class="small" onclick="changeQty('${jsq(n)}',1)">+</button>
-            <span>₹${cart[n].price * cart[n].qty}</span>
-            <button class="small" onclick="removeItem('${jsq(n)}')">✕</button>
-          </div>`; }).join("")
-      : "Cart is empty.";
-    document.getElementById("total").textContent = total;
-    saveCart();
-  }
-
-  // ---------- Order + status tracking (simulated) ----------
-  function placeOrder(){
-    const err = document.getElementById("formErr");
-    if(!Object.keys(cart).length){ err.textContent = "Add something to your cart first."; return; }
-    const name = document.getElementById("cname").value.trim();
-    const phone = document.getElementById("cphone").value.trim();
-    const addr = document.getElementById("caddr").value.trim();
-    const pay = document.getElementById("cpay").value;
-    if(name.length < 2){ err.textContent = "Please enter your name."; return; }
-    if(!/^[6-9]\d{9}$/.test(phone)){ err.textContent = "Enter a valid 10-digit phone number."; return; }
-    if(addr.length < 8){ err.textContent = "Please enter your full delivery address."; return; }
-    err.textContent = "";
-
-    const id = Math.floor(1000 + Math.random()*9000);
-    const total = document.getElementById("total").textContent;
-    const lines = Object.keys(cart).map(n => `${esc(n)} × ${cart[n].qty}`).join(", ");
-    cart = {}; renderCart();
-
-    let step = 0;
-    clearInterval(orderTimer);
-    const show = () => document.getElementById("track").innerHTML =
-      `<b>Order #${id}</b> for ${esc(name)} – ₹${total} (${esc(pay)})<br>
-       <small>${lines}</small><br>
-       <small>Deliver to: ${esc(addr)} · ${esc(phone)}</small>
-       <div class="steps">${STATUSES.map((s,i) =>
-         `<span class="step ${i <= step ? "done" : ""}">${s}</span>`).join("")}</div>
-       <p>Status: <span class="badge">${STATUSES[step]}</span></p>`;
-    show();
-    orderTimer = setInterval(() => {
-      step++; show();
-      if(step >= STATUSES.length - 1) clearInterval(orderTimer);
-    }, 6000);
-  }
-
-  // ---------- Chat helpers ----------
-  function toggleChat(){
-    const c = document.getElementById("chat");
-    c.classList.toggle("min");
-    document.getElementById("chev").textContent = c.classList.contains("min") ? "▲" : "▼";
-  }
-
-  // turns **bold**, *italic*, bullets and new lines into clean HTML
-  function fmt(s){
-    return esc(s)
-      .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
-      .replace(/^\s*[\*\-]\s+/gm, "• ")
-      .replace(/\*(.+?)\*/g, "<i>$1</i>")
-      .replace(/\n/g, "<br>");
-  }
-
-  function findDish(name){
-    const n = name.toLowerCase().trim();
-    for (const r of DATA) for (const i of r.items)
-      if (i.name.toLowerCase() === n) return i;
-    return null;
-  }
-
-  // ---------- AI assistant (Gemini API) with memory, retry + backup models ----------
-  async function ask(){
-    const q = document.getElementById("q"), msgs = document.getElementById("msgs");
-    const key = document.getElementById("key").value.trim();
-    const text = q.value.trim();
-    if(!text) return;
-    q.value = "";
-    msgs.innerHTML += `<p><b>You:</b> ${esc(text)}</p>`;
-
-    if(!key){
-      const words = text.toLowerCase().split(/\s+/);
-      const found = [];
-      DATA.forEach(r => r.items.forEach(i => {
-        const hay = (r.name + " " + r.cuisine + " " + i.name).toLowerCase();
-        if (words.some(w => w.length > 2 && hay.includes(w)))
-          found.push(`${i.name} (₹${i.price}) at ${r.name}`);
-      }));
-      msgs.innerHTML += `<p><b>Basic search (no AI key):</b> ${found.length
-        ? "You can try: " + found.map(esc).join(", ")
-        : "Sorry, nothing matched. Try pizza, biryani or burger."}</p>`;
-      msgs.scrollTop = msgs.scrollHeight;
-      return;
+  const menu=DATA.map(r=>r.name+": "+r.items.map(i=>`${i.name} ₹${i.price} (${i.veg?"veg":"non-veg"})`).join(", ")).join("\n");
+  const sys="You are a friendly food ordering assistant for CloudFood. Recommend dishes ONLY from this menu and mention restaurant and price. Keep replies short. If the customer agrees to add a dish, end your reply with a separate line exactly like: ADD: <exact dish name>.\nMenu:\n"+menu;
+  history.push({role:"user",parts:[{text}]}); history=history.slice(-10);
+  const wait=addMsg("s","Thinking…"); let answer="",err="";
+  for(const m of MODELS){
+    for(let t=0;t<2&&!answer;t++){
+      try{
+        const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(key)}`,
+          {method:"POST",headers:{"Content-Type":"application/json"},signal:AbortSignal.timeout(15000),
+           body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:history})});
+        const data=await res.json();
+        answer=data.candidates?.[0]?.content?.parts?.[0]?.text||"";
+        if(!answer){
+          err="Error "+res.status+": "+(data.error?.message||"no answer");
+          if([400,401,403].includes(res.status)) break;
+          if(res.status===503||res.status===429) await new Promise(r=>setTimeout(r,2000)); else break;
+        }
+      }catch(e){err="Request failed: "+e.message; break}
     }
-
-    const menu = DATA.map(r => r.name + ": " + r.items.map(i =>
-      `${i.name} ₹${i.price} (${i.veg ? "veg" : "non-veg"})`).join(", ")).join("\n");
-    const sys = "You are a friendly food ordering assistant for CloudFood. " +
-      "Recommend dishes ONLY from this menu, mention restaurant and price, keep it short. " +
-      "Use the earlier conversation to understand short replies like 'yes' or 'add it'. " +
-      "When the customer clearly agrees to add a dish to their order, confirm briefly and end your reply " +
-      "with a separate final line in exactly this format: ADD: <exact dish name from the menu>. " +
-      "Never write the ADD line unless the customer has agreed.\n\nMenu:\n" + menu;
-
-    history.push({role:"user", parts:[{text}]});
-
-    const wait = document.createElement("p");
-    wait.innerHTML = "<b>AI:</b> Thinking…";
-    msgs.appendChild(wait);
-    msgs.scrollTop = msgs.scrollHeight;
-
-    let answer = "", lastErr = "";
-    for (const model of MODELS) {
-      for (let attempt = 0; attempt < 2 && !answer; attempt++) {
-        try {
-          const res = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`,
-            {method:"POST", headers:{"Content-Type":"application/json"}, signal: AbortSignal.timeout(15000),
-             body: JSON.stringify({
-               systemInstruction:{parts:[{text:sys}]},
-               contents: history})});
-          const data = await res.json();
-          answer = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-          if (!answer) {
-            lastErr = "Error " + res.status + ": " + (data.error?.message || "no answer");
-            if (res.status === 401 || res.status === 403 || res.status === 400) break;
-            if (res.status === 503 || res.status === 429) await new Promise(r => setTimeout(r, 2000));
-            else break;
-          }
-        } catch (e) { lastErr = "Request failed: " + e.message; break; }
-      }
-      if (answer) break;
-    }
-
-    if (answer) {
-      history.push({role:"model", parts:[{text:answer}]});
-      // let the AI add items to the cart
-      const m = answer.match(/^\s*ADD:\s*(.+)$/im);
-      let note = "";
-      if (m) {
-        const dish = findDish(m[1].replace(/\*/g,""));
-        if (dish) { addItem(dish.name, dish.price); note = `<br><i>✅ ${esc(dish.name)} added to your cart.</i>`; }
-        answer = answer.replace(/^\s*ADD:.*$/im, "").trim();
-      }
-      wait.innerHTML = "<b>AI:</b> " + fmt(answer) + note;
-    } else {
-      history.pop();   // remove the failed question so memory stays clean
-      wait.innerHTML = "<b>AI:</b> " + esc(lastErr);
-    }
-    msgs.scrollTop = msgs.scrollHeight;
+    if(answer||/^Error (400|401|403)/.test(err)) break;
   }
+  wait.remove();
+  if(!answer){history.pop(); addMsg("s",err); return}
+  history.push({role:"model",parts:[{text:answer}]});
+  const mm=answer.match(/^ADD:\s*(.+)$/im);
+  addMsg("a",answer.replace(/^ADD:.*$/gim,"").trim()||"Done!");
+  if(mm){const d=addItem(mm[1]); if(d) addMsg("s","✅ Added "+d.name+" to your cart")}
+}
 
-  // ---------- Start ----------
-  loadCart();
-  renderCart();
-  renderRestaurants();
+/* ===== 7. Buttons and start ===== */
+$("search").oninput=renderMenu; $("sort").onchange=renderMenu;
+$("vegbtn").onclick=()=>{vegOnly=!vegOnly;$("vegbtn").classList.toggle("on",vegOnly);renderMenu()};
+$("cartbtn").onclick=()=>$("side").classList.add("open");
+$("closecart").onclick=()=>$("side").classList.remove("open");
+$("side").onclick=e=>{if(e.target.id==="side") $("side").classList.remove("open")};
+const toggleChat=()=>$("chat").classList.toggle("open");
+$("fab").onclick=toggleChat; $("heroask").onclick=toggleChat;
+$("ask").onclick=ask; $("q").onkeydown=e=>{if(e.key==="Enter") ask()};
+addMsg("s","Hi! Ask me for a dish, e.g. “cheap veg meal under ₹150”.");
+renderMenu(); renderCart();
 </script>
 </body>
 </html>
